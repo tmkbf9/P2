@@ -16,11 +16,15 @@ all: test
 libscanner.a: scanner.o token.o
 	$(AR) rcs $@ $^
 
-test: parser_test
+test: parser_test node_factory_test
 	./parser_test
+	./node_factory_test
 
-parser_test: libP1.a 
+parser_test: parser_test.o libscanner.a 
 	$(GCC) -o $@ $^
+
+node_factory_test: node_factory_test.o node_factory.o libscanner.a
+	$(GCC) -o $@ $^ libscanner.a
 
 clean:
 	$(RM) -f P2
