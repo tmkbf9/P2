@@ -76,8 +76,8 @@ Node* Parser::createBNode(token& startingToken) {
 
         if (literal == "end")
         {
-            Node* beginNode = new Node("BeginNode", startingToken);
-            newNode->addSubtree(beginNode, nodeCount++);
+            Node* endNode = new Node("EndNode", startingToken);
+            newNode->addSubtree(endNode, nodeCount++);
         }
     }
 

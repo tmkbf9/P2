@@ -19,7 +19,10 @@ void test_smallest_valid_BNF() {
 
     assert(rootNode->nodeName == "<S>");
     assert(rootNode->subTrees[0]->nodeName == "ProgramNode");
-    //assert(rootNode->subTrees[1];
+    assert(rootNode->subTrees[1]->nodeName == "<B>");
+    assert(rootNode->subTrees[1]->subTrees[0]->nodeName == "BeginNode");
+    assert(rootNode->subTrees[1]->subTrees[1]->nodeName == "EndNode");
+    //assert(rootNode->subTrees)
 }
 void programKeywordOnlyIsInvalidProgram() {
   static string programText = "program";
