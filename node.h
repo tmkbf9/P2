@@ -4,11 +4,12 @@
 #include <string>
 #include <vector>
 
-class token;
+#include "token.h"
 
 class Node {
  public:
-  Node(const std::string & nodeName, token * token) : nodeName(nodeName), tk(token) {}
+  Node(const std::string & nodeName) : nodeName(nodeName) {}
+  Node(const std::string & nodeName, token & token) : nodeName(nodeName), tk(token) {}
 
   void addSubtree(Node * subTree, int at) {
     subTrees[at] = subTree;
@@ -16,7 +17,7 @@ class Node {
 
  private:
   std::string nodeName;
-  token * tk;
+  token tk;
   std::vector<Node *> subTrees;
 };
 
