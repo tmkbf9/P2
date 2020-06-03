@@ -1,8 +1,10 @@
 #include <cstddef>
 #include <string>
-
+#include <iostream>
 #include "parser.h"
 #include "node.h"
+#include "scanner.h"
+#include "token.h"
 
 using namespace std;
 
@@ -30,7 +32,7 @@ Node * Parser::createSNode(token & startingToken) {
     }
 
     if(startingToken.tokenLiteral == "begin") {
-      Node * bNode = createBNode();
+      Node * bNode = createBNode(startingToken);
       newNode->addSubtree(bNode, nodeCount++);
       startingToken = scanner.scanner();
 
@@ -86,7 +88,11 @@ Node* Parser::createBNode(token& startingToken) {
 
     return newNode;
 }
-
-
+Node* Parser::createVNode(token& startingToken) {
+    return NULL;
+}
+Node* Parser::createQNode(token& startingToken) {
+    return NULL;
+}
 
 

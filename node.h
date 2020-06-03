@@ -11,11 +11,11 @@ class Node {
   Node(const std::string & nodeName) : nodeName(nodeName) {}
   Node(const std::string & nodeName, token & token) : nodeName(nodeName), tk(token) {}
 
-  void addSubtree(Node * subTree, int at) {
-    subTrees[at] = subTree;
+  void addSubtree(Node * subTree, int count) {
+    subTrees.push_back (subTree);
   }
 
- private:
+ //private:
   std::string nodeName;
   token tk;
   std::vector<Node *> subTrees;

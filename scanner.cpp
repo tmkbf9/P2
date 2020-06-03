@@ -69,7 +69,7 @@ token Scanner::scanner() {
   do {
     int currentChar = tokenStream.get();
     int lookaheadChar = tokenStream.peek();
-    errorStream << linenumber << ": " << currentChar << ": " << lookaheadChar << endl;
+    //errorStream << linenumber << ": " << currentChar << ": " << lookaheadChar << endl;
     
     if(currentChar == '\n') {
       linenumber++;

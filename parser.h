@@ -3,6 +3,7 @@
 
 class Scanner;
 class Node;
+struct token;
 
 class Parser {
  public:
@@ -10,8 +11,10 @@ class Parser {
 
   Node * parse();
 
-  Node * createSNode(token & token);
-  Node* createBNode(token & token);
+  Node * createSNode(token &token);
+  Node * createBNode(token &token);
+  Node * createVNode(token &token);
+  Node * createQNode(token &token);
 
  private:
   Scanner & scanner;
