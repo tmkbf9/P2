@@ -10,7 +10,8 @@ class Parser {
 
   Node * parse();
 
-  void createSNode(token);
+  Node * createSNode(token & token);
+  Node* createBNode(token & token);
 
  private:
   Scanner & scanner;

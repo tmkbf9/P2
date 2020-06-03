@@ -7,7 +7,7 @@
 #include "token.h"
 
 class Node {
- public:
+ public:    
   Node(const std::string & nodeName) : nodeName(nodeName) {}
   Node(const std::string & nodeName, token & token) : nodeName(nodeName), tk(token) {}
 

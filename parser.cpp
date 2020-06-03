@@ -1,14 +1,19 @@
 #include <cstddef>
+#include <string>
+
 #include "parser.h"
+#include "node.h"
+
+using namespace std;
 
 Node * Parser::parse() {
   token startingToken = scanner.scanner();
 
-  return createSToken(startingToken);
+  return createSNode(startingToken);
 }
 
-Node * Parser::createSToken(token & startingToken) {
-  Node newNode = new Node("<S>");
+Node * Parser::createSNode(token & startingToken) {
+  Node * newNode = new Node("<S>");
   string literal = startingToken.tokenLiteral;
   int nodeCount = 0;
   
@@ -24,7 +29,7 @@ Node * Parser::createSToken(token & startingToken) {
       startingToken = scanner.scanner();
     }
 
-    if(lookaheadToken.tokenLiteral == "begin") {
+    if(startingToken.tokenLiteral == "begin") {
       Node * bNode = createBNode();
       newNode->addSubtree(bNode, nodeCount++);
       startingToken = scanner.scanner();
@@ -44,6 +49,43 @@ Node * Parser::createSToken(token & startingToken) {
   return newNode;
 }
 
+Node* Parser::createBNode(token& startingToken) {
+    Node * newNode = new Node("<B>");
+    int nodeCount = 0;
+
+    if (startingToken.tokenLiteral == "begin") {
+        Node* beginNode = new Node("BeginNode", startingToken);
+        newNode->addSubtree(beginNode, nodeCount++);
+
+        startingToken = scanner.scanner();
+        string literal = startingToken.tokenLiteral;
+
+        if (literal == "var") {
+            Node * vNode = createVNode(startingToken);
+            newNode->addSubtree(vNode, nodeCount++);
+            startingToken = scanner.scanner();
+        }
+
+        if (literal == "scan" || literal == "write" || literal == "begin" || literal == "if" || literal == "repeat" || literal == "let") {
+            Node* qNode = createQNode(startingToken);
+            newNode->addSubtree(qNode, nodeCount++);
+            startingToken = scanner.scanner();
+        }
+
+        if (literal == "end")
+        {
+            Node* beginNode = new Node("BeginNode", startingToken);
+            newNode->addSubtree(beginNode, nodeCount++);
+        }
+    }
+
+    if (nodeCount == 0 || nodeCount == 1) {
+        cerr << "error encountered at line " << startingToken.linenumber << ". Token: " << startingToken << endl;
+        return NULL;
+    }
+
+    return newNode;
+}
 
 
 
