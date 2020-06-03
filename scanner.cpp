@@ -4,7 +4,6 @@
 #include <cstdio>
 
 #include "scanner.h"
-#include "testScanner.h"
 #include "token.h"
 
 using namespace std;

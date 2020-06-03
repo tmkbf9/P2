@@ -11,20 +11,17 @@ AR := ar
 
 all: test
 
-#P2: libP1.a
+P2: P2.o parser.o test_tree.o libscanner.a
+	$(GCC) -o $@ $^ libscanner.a
 
-libscanner.a: scanner.o token.o
+libscanner.a: scanner.o token.o 
 	$(AR) rcs $@ $^
 
-test: parser_test node_factory_test
+test: parser_test
 	./parser_test
-	./node_factory_test
 
 parser_test: parser_test.o libscanner.a 
 	$(GCC) -o $@ $^
-
-node_factory_test: node_factory_test.o node_factory.o libscanner.a
-	$(GCC) -o $@ $^ libscanner.a
 
 clean:
 	$(RM) -f P2
