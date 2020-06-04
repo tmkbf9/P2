@@ -20,6 +20,8 @@ class Parser {
   Node * createQNode(token &token);
   Node * createTNode(token& token);
   Node * createWNode(token& token);
+  Node * createANode(token& token);
+  Node * createINode(token& token);
 
  private:
   Scanner & scanner;

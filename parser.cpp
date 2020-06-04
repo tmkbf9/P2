@@ -155,6 +155,7 @@ Node* Parser::createMNode(token& startingToken) {
     }
 
     if (nodeCount == 2) {
+        startingToken = scanner.scanner();
         Node* mNode = createMNode(startingToken);
         newNode->addSubtree(mNode, nodeCount++);
     }
@@ -281,6 +282,35 @@ Node* Parser::createTNode(token& startingToken) {
     return newNode;
 }
 
+Node* Parser::createANode(token& startingToken) {
+    Node* newNode = new Node("<A>");
+    int nodeCount = 0;
+
+    if (startingToken.tokenLiteral == "scan") {
+        Node* scanNode = new Node("ScanNode", startingToken);
+        newNode->addSubtree(scanNode, nodeCount++);
+        startingToken = scanner.scanner();
+
+        if (startingToken.tokenID == "IDTK") {
+            Node* identifierNode = new Node("IdentifierNode", startingToken);
+            newNode->addSubtree(identifierNode, nodeCount++);
+            startingToken = scanner.scanner();
+        }
+        else if (startingToken.tokenID == "NUMTK") {
+            Node* numberNode = new Node("NumberNode", startingToken);
+            newNode->addSubtree(numberNode, nodeCount++);
+            startingToken = scanner.scanner();
+        }
+    }
+
+    if (nodeCount != 2) {
+        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
+        return NULL;
+    }
+
+    return newNode;
+}
+
 Node* Parser::createWNode(token& startingToken) {
     Node* newNode = new Node("<W>");
     int nodeCount = 0;
@@ -289,6 +319,7 @@ Node* Parser::createWNode(token& startingToken) {
         Node* writeNode = new Node("WriteNode", startingToken);
         newNode->addSubtree(writeNode, nodeCount++);
         startingToken = scanner.scanner();
+
     }
 
     Node* mNode = createMNode(startingToken);
@@ -301,3 +332,26 @@ Node* Parser::createWNode(token& startingToken) {
     return newNode;
 }
 
+Node* Parser::createINode(token& startingToken) {
+    Node* newNode = new Node("<I>");
+    int nodeCount = 0;
+
+    if (startingToken.tokenLiteral == "if") {
+        Node* ifNode = new Node("IfNode", startingToken);
+        newNode->addSubtree(ifNode, nodeCount++);
+        startingToken = scanner.scanner();
+
+        if (startingToken.tokenLiteral == "[") {
+            Node* openBracketNode = new Node("OpenBracketNode", startingToken);
+            newNode->addSubtree(openBracketNode, nodeCount++);
+            startingToken = scanner.scanner();
+
+            Node* mNode = createMNode(startingToken);
+            newNode->addSubtree(mNode, nodeCount++);
+            
+
+        }
+    }
+    return newNode;
+}
+    
