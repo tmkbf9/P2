@@ -248,7 +248,8 @@ Node* Parser::createTNode(token& startingToken) {
     bool bNodeCreated = false;
 
     if (startingToken.tokenLiteral == "scan") {
-
+        Node* aNode = createANode(startingToken);
+        newNode->addSubtree(aNode, nodeCount++);
     }
     else if (startingToken.tokenLiteral == "write") {
         Node* wNode = createWNode(startingToken);
