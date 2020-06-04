@@ -14,7 +14,12 @@ class Parser {
   Node * createSNode(token &token);
   Node * createBNode(token &token);
   Node * createVNode(token &token);
+  Node * createMNode(token& token);
+  Node * createHNode(token& token);
+  Node * createRNode(token& token);
   Node * createQNode(token &token);
+  Node * createTNode(token& token);
+  Node * createWNode(token& token);
 
  private:
   Scanner & scanner;
