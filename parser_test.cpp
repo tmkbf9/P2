@@ -7,8 +7,10 @@
 #include "scanner.h"
 #include "parser.h"
 #include "node.h"
+#include "test_tree.h"
 
 using namespace std;
+
 void test_smallest_valid_BNF() {
     istringstream is("program begin end");
 
@@ -234,7 +236,21 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_cau
     assert(rootNode->nodeName == "ERROR");
     assert(rootNode->tk.tokenLiteral == "#");
 }
+//print testing
+void test_print_smallest_valid_BNF() {
+    istringstream is("program begin end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    token tk;
+    Parser parser(scanner, tk);
+    TestTree t;
+    Node* rootNode = parser.parse();
+    t.printTree(rootNode, os);
+    cout << os.str();
 
+    assert(rootNode->nodeName == "<S>");
+    assert(rootNode->subTrees[0]->nodeName == "ProgramNode");
+}
 
 int main(int argc, char ** argv) {
     test_smallest_valid_BNF();
@@ -248,7 +264,7 @@ int main(int argc, char ** argv) {
     test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_with_multiple_M_nodes();
     test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_E_node();
     test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_cause_error();
-
+    test_print_smallest_valid_BNF();
 
 
     return 0;

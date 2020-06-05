@@ -7,7 +7,8 @@ class Node;
 
 class TestTree {
  public:
-  void print(Node * rootNode, std::ostream & os);
+  void printTree(Node * rootNode, std::ostream & os);
+  void traversePreOrder(Node* rootNode, std::ostream & os, int depth);
 };
 
 #endif
