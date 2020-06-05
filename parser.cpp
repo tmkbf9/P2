@@ -360,7 +360,6 @@ Node* Parser::createINode(token& startingToken) {
 
             Node* mNode = createMNode(startingToken);
             newNode->addSubtree(mNode, nodeCount++);
-            startingToken = scanner.scanner();
 
             Node* zNode = createZNode(startingToken);
             newNode->addSubtree(zNode, nodeCount++);
@@ -368,7 +367,6 @@ Node* Parser::createINode(token& startingToken) {
 
             mNode = createMNode(startingToken);
             newNode->addSubtree(mNode, nodeCount++);
-            startingToken = scanner.scanner();
 
             if (startingToken.tokenLiteral == "]") {
                 Node* closedBracketNode = new Node("closedBracketNode", startingToken);
@@ -405,7 +403,6 @@ Node* Parser::createGNode(token& startingToken) {
 
             Node* mNode = createMNode(startingToken);
             newNode->addSubtree(mNode, nodeCount++);
-            startingToken = scanner.scanner();
 
             Node* zNode = createZNode(startingToken);
             newNode->addSubtree(zNode, nodeCount++);
@@ -413,7 +410,6 @@ Node* Parser::createGNode(token& startingToken) {
 
             mNode = createMNode(startingToken);
             newNode->addSubtree(mNode, nodeCount++);
-            startingToken = scanner.scanner();
 
             if (startingToken.tokenLiteral == "]") {
                 Node* closedBracketNode = new Node("closedBracketNode", startingToken);
@@ -435,7 +431,7 @@ Node* Parser::createGNode(token& startingToken) {
 }
 
 Node* Parser::createENode(token& startingToken) {
-    Node* newNode = new Node("<I>");
+    Node* newNode = new Node("<E>");
     int nodeCount = 0;
 
     if (startingToken.tokenLiteral == "let") {
@@ -462,7 +458,7 @@ Node* Parser::createENode(token& startingToken) {
     return newNode;
 }
 Node* Parser::createZNode(token & startingToken) {
-    Node* newNode = new Node("<I>");
+    Node* newNode = new Node("<Z>");
     int nodeCount = 0;
 
     if (startingToken.tokenLiteral == "<") {
@@ -486,9 +482,6 @@ Node* Parser::createZNode(token & startingToken) {
         newNode->addSubtree(assNode, nodeCount++);
     }
 
-    if (nodeCount == 1) {
-        startingToken = scanner.scanner();
-    }
 
     if (nodeCount != 1 && validParse) {
         validParse = false;
