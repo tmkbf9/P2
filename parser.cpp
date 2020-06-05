@@ -1,6 +1,8 @@
 #include <cstddef>
 #include <string>
 #include <iostream>
+#include <sstream>
+
 #include "parser.h"
 #include "node.h"
 #include "scanner.h"
@@ -9,6 +11,7 @@
 using namespace std;
 
 Node * Parser::parse() {
+  validParse = true;
   token startingToken = scanner.scanner();
 
   return createSNode(startingToken);
@@ -37,15 +40,18 @@ Node * Parser::createSNode(token & startingToken) {
       startingToken = scanner.scanner();
 
       if(startingToken.tokenID != "EOFTK") {
-	cerr << "error encountered at line " << startingToken.linenumber << ". Token: " << startingToken << endl;
-	return NULL;
+          validParse = false; 
       }
     } 
   }    
   
-  if(nodeCount == 0 || nodeCount == 1) {
-    cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-    return NULL;
+  if ((nodeCount == 0 || nodeCount == 1) && validParse) {
+    validParse = false;
+    errTk = startingToken;
+  }
+
+  if (!validParse) {
+      newNode = new Node("ERROR", errTk);
   }
 
   return newNode;
@@ -80,13 +86,14 @@ Node* Parser::createBNode(token& startingToken) {
         }
     }
 
-    if (nodeCount == 0 || nodeCount == 1) {
-        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-        return NULL;
+    if ((nodeCount == 0 || nodeCount == 1) && validParse) {
+        validParse = false;
+        errTk = startingToken;
     }
 
     return newNode;
 }
+
 Node* Parser::createVNode(token& startingToken) {
     Node* newNode = new Node("<V>");
     int nodeCount = 0;
@@ -120,9 +127,10 @@ Node* Parser::createVNode(token& startingToken) {
         }
     }
 
-    if (nodeCount != 4 && nodeCount != 3) {
-        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-        return NULL;
+    if (nodeCount != 4 && nodeCount != 3 && validParse) {
+       
+        validParse = false;
+        errTk = startingToken;
     }
 
     return newNode;
@@ -161,9 +169,9 @@ Node* Parser::createMNode(token& startingToken) {
     }
 
 
-    if (nodeCount != 1 && nodeCount != 3) {
-        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-        return NULL;
+    if ((nodeCount != 1 && nodeCount != 3) && validParse) {
+        validParse = false;
+        errTk = startingToken;
     }
 
     return newNode;
@@ -183,9 +191,9 @@ Node* Parser::createHNode(token& startingToken) {
         newNode->addSubtree(rNode, nodeCount++);
     }
 
-    if (nodeCount != 1 && nodeCount != 2) {
-        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-        return NULL;
+    if ((nodeCount != 1 && nodeCount != 2) && validParse) {
+        validParse = false;
+        errTk = startingToken;
     }
 
     return newNode;
@@ -204,9 +212,9 @@ Node* Parser::createRNode(token& startingToken) {
         newNode->addSubtree(numberNode, nodeCount++);
     }
 
-    if (nodeCount != 1) {
-        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-        return NULL;
+    if (nodeCount != 1 && validParse) {
+        validParse = false;
+        errTk = startingToken;
     }
 
     return newNode;
@@ -234,9 +242,9 @@ Node* Parser::createQNode(token& startingToken) {
         }
     }
 
-    if (nodeCount != 2 && nodeCount != 3) {
-        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-        return NULL;
+    if ((nodeCount != 2 && nodeCount != 3) && validParse) {
+        validParse = false;
+        errTk = startingToken;
     }
 
     return newNode;
@@ -261,13 +269,16 @@ Node* Parser::createTNode(token& startingToken) {
         bNodeCreated = true;
     }
     else if (startingToken.tokenLiteral == "if") {
-
+        Node* iNode = createINode(startingToken);
+        newNode->addSubtree(iNode, nodeCount++);
     }
     else if (startingToken.tokenLiteral == "repeat") {
-
+        Node* gNode = createGNode(startingToken);
+        newNode->addSubtree(gNode, nodeCount++);
     }
     else if (startingToken.tokenLiteral == "let") {
-
+        Node* eNode = createENode(startingToken);
+        newNode->addSubtree(eNode, nodeCount++);
     }
 
     if (startingToken.tokenLiteral == "," && bNodeCreated == false) {
@@ -275,9 +286,9 @@ Node* Parser::createTNode(token& startingToken) {
         newNode->addSubtree(commaNode, nodeCount++);
     }
 
-    if ((nodeCount != 2 && bNodeCreated == false) || (nodeCount != 1 && bNodeCreated == true)) {
-        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-        return NULL;
+    if (((nodeCount != 2 && bNodeCreated == false) || (nodeCount != 1 && bNodeCreated == true)) && validParse) {
+        validParse = false;
+        errTk = startingToken;
     }
 
     return newNode;
@@ -304,9 +315,9 @@ Node* Parser::createANode(token& startingToken) {
         }
     }
 
-    if (nodeCount != 2) {
-        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-        return NULL;
+    if (nodeCount != 2 && validParse) {
+        validParse = false;
+        newNode = new Node("ERROR", startingToken);
     }
 
     return newNode;
@@ -326,9 +337,9 @@ Node* Parser::createWNode(token& startingToken) {
     Node* mNode = createMNode(startingToken);
     newNode->addSubtree(mNode, nodeCount++);
 
-    if (nodeCount != 2) {
-        cerr << "error encountered at: " << newNode->nodeName << ". Token: " << startingToken << endl;
-        return NULL;
+    if (nodeCount != 2 && validParse) {
+        validParse = false;
+        newNode = new Node("ERROR", startingToken);
     }
     return newNode;
 }
@@ -349,10 +360,139 @@ Node* Parser::createINode(token& startingToken) {
 
             Node* mNode = createMNode(startingToken);
             newNode->addSubtree(mNode, nodeCount++);
-            
+            startingToken = scanner.scanner();
 
+            Node* zNode = createZNode(startingToken);
+            newNode->addSubtree(zNode, nodeCount++);
+            startingToken = scanner.scanner();
+
+            mNode = createMNode(startingToken);
+            newNode->addSubtree(mNode, nodeCount++);
+            startingToken = scanner.scanner();
+
+            if (startingToken.tokenLiteral == "]") {
+                Node* closedBracketNode = new Node("closedBracketNode", startingToken);
+                newNode->addSubtree(closedBracketNode, nodeCount++);
+                startingToken = scanner.scanner();
+
+                Node* tNode = createTNode(startingToken);
+                newNode->addSubtree(tNode, nodeCount++);
+                startingToken = scanner.scanner();
+            }
         }
+    }
+
+    if (nodeCount != 7 && validParse) {
+        validParse = false;
+        errTk = startingToken;
     }
     return newNode;
 }
-    
+
+Node* Parser::createGNode(token& startingToken) {
+    Node* newNode = new Node("<I>");
+    int nodeCount = 0;
+
+    if (startingToken.tokenLiteral == "repeat") {
+        Node* repeatNode = new Node("repeatNode", startingToken);
+        newNode->addSubtree(repeatNode, nodeCount++);
+        startingToken = scanner.scanner();
+
+        if (startingToken.tokenLiteral == "[") {
+            Node* openBracketNode = new Node("OpenBracketNode", startingToken);
+            newNode->addSubtree(openBracketNode, nodeCount++);
+            startingToken = scanner.scanner();
+
+            Node* mNode = createMNode(startingToken);
+            newNode->addSubtree(mNode, nodeCount++);
+            startingToken = scanner.scanner();
+
+            Node* zNode = createZNode(startingToken);
+            newNode->addSubtree(zNode, nodeCount++);
+            startingToken = scanner.scanner();
+
+            mNode = createMNode(startingToken);
+            newNode->addSubtree(mNode, nodeCount++);
+            startingToken = scanner.scanner();
+
+            if (startingToken.tokenLiteral == "]") {
+                Node* closedBracketNode = new Node("closedBracketNode", startingToken);
+                newNode->addSubtree(closedBracketNode, nodeCount++);
+                startingToken = scanner.scanner();
+
+                Node* tNode = createTNode(startingToken);
+                newNode->addSubtree(tNode, nodeCount++);
+                startingToken = scanner.scanner();
+            }
+        }
+    }
+
+    if (nodeCount != 7 && validParse) {
+        validParse = false;
+        errTk = startingToken;
+    }
+    return newNode;
+}
+
+Node* Parser::createENode(token& startingToken) {
+    Node* newNode = new Node("<I>");
+    int nodeCount = 0;
+
+    if (startingToken.tokenLiteral == "let") {
+        Node* letNode = new Node("LetNode", startingToken);
+        newNode->addSubtree(letNode, nodeCount++);
+        startingToken = scanner.scanner();
+
+        if (startingToken.tokenID == "IDTK") {
+            Node* identifierNode = new Node("IdentifierNode", startingToken);
+            newNode->addSubtree(identifierNode, nodeCount++);
+            startingToken = scanner.scanner();
+
+            if (startingToken.tokenLiteral == ":") {
+                Node* colonNode = new Node("ColonNode", startingToken);
+                newNode->addSubtree(colonNode, nodeCount++);
+                startingToken = scanner.scanner();
+
+                Node* mNode = createMNode(startingToken);
+                newNode->addSubtree(mNode, nodeCount++);
+            }
+        }
+    }
+
+    return newNode;
+}
+Node* Parser::createZNode(token & startingToken) {
+    Node* newNode = new Node("<I>");
+    int nodeCount = 0;
+
+    if (startingToken.tokenLiteral == "<") {
+        Node* lessNode = new Node("LessNode", startingToken);
+        newNode->addSubtree(lessNode, nodeCount++);
+    }
+    else if (startingToken.tokenLiteral == ">") {
+        Node* greaterNode = new Node("GreaterNode", startingToken);
+        newNode->addSubtree(greaterNode, nodeCount++);
+    }
+    else if (startingToken.tokenLiteral == ":") {
+        Node* colonNode = new Node("ColonNode", startingToken);
+        newNode->addSubtree(colonNode, nodeCount++);
+    }
+    else if (startingToken.tokenLiteral == "=") {
+        Node* equalsNode = new Node("EqualsNode", startingToken);
+        newNode->addSubtree(equalsNode, nodeCount++);
+    }
+    else if (startingToken.tokenLiteral == "==") {
+        Node* assNode = new Node("AssNode", startingToken);
+        newNode->addSubtree(assNode, nodeCount++);
+    }
+
+    if (nodeCount == 1) {
+        startingToken = scanner.scanner();
+    }
+
+    if (nodeCount != 1 && validParse) {
+        validParse = false;
+        errTk = startingToken;
+    }
+    return newNode;
+}

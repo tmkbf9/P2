@@ -7,7 +7,7 @@ struct token;
 
 class Parser {
  public:
-  Parser(Scanner & scanner) : scanner(scanner) {}
+  Parser(Scanner & scanner, token & token) : scanner(scanner), errTk(token) {}
 
   Node * parse();
 
@@ -19,12 +19,17 @@ class Parser {
   Node * createRNode(token& token);
   Node * createQNode(token &token);
   Node * createTNode(token& token);
-  Node * createWNode(token& token);
   Node * createANode(token& token);
+  Node * createWNode(token& token);
   Node * createINode(token& token);
+  Node * createGNode(token& token);
+  Node * createENode(token& token);
+  Node * createZNode(token& token);
 
  private:
   Scanner & scanner;
+  bool validParse = true;
+  token& errTk;
 };
 
 #endif

@@ -13,7 +13,8 @@ void test_smallest_valid_BNF() {
     istringstream is("program begin end");
 
     Scanner scanner(is, cerr);
-    Parser parser(scanner);
+    token tk;
+    Parser parser(scanner, tk);
 
     Node* rootNode = parser.parse();
 
@@ -28,7 +29,8 @@ void test_smallest_valid_BNF_with_V_before_B() {
     istringstream is("program var aa . begin end");
 
     Scanner scanner(is, cerr);
-    Parser parser(scanner);
+    token tk;
+    Parser parser(scanner, tk);
 
     Node* rootNode = parser.parse();
 
@@ -43,7 +45,8 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node() {
     istringstream is("program begin begin end # end");
 
     Scanner scanner(is, cerr);
-    Parser parser(scanner);
+    token tk;
+    Parser parser(scanner, tk);
 
     Node* rootNode = parser.parse();
 
@@ -60,7 +63,8 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node() {
     istringstream is("program begin begin end # end");
 
     Scanner scanner(is, cerr);
-    Parser parser(scanner);
+    token tk;
+    Parser parser(scanner, tk);
 
     Node* rootNode = parser.parse();
 
@@ -78,7 +82,8 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_B_node() {
     istringstream is("program begin begin end # end");
 
     Scanner scanner(is, cerr);
-    Parser parser(scanner);
+    token tk;
+    Parser parser(scanner, tk);
 
     Node* rootNode = parser.parse();
 
@@ -99,7 +104,8 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node() {
     istringstream is("program begin write 12 , # end");
 
     Scanner scanner(is, cerr);
-    Parser parser(scanner);
+    token tk;
+    Parser parser(scanner, tk);
 
     Node* rootNode = parser.parse();
 
@@ -119,11 +125,40 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node() {
     assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[1]->tk.tokenLiteral == ",");
     assert(rootNode->subTrees[1]->subTrees[2]->nodeName == "EndNode");
 }
+void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_I_node() {
+    istringstream is("program begin if [ 12 > 5 ] begin end , # end");
+
+    Scanner scanner(is, cerr);
+    token tk;
+    Parser parser(scanner, tk);
+
+    Node* rootNode = parser.parse();
+
+    assert(rootNode->nodeName == "<S>");
+    assert(rootNode->subTrees[0]->nodeName == "ProgramNode");
+    assert(rootNode->subTrees[1]->nodeName == "<B>");
+    assert(rootNode->subTrees[1]->subTrees[0]->nodeName == "BeginNode");
+    assert(rootNode->subTrees[1]->subTrees[1]->nodeName == "<Q>");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->nodeName == "<T>");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[1]->tk.tokenLiteral == "#");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->nodeName == "<I>");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[0]->tk.tokenLiteral == "if");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[1]->tk.tokenLiteral == "[");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[2]->nodeName == "<M>");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[1]->subTrees[0]->nodeName == "<H>");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[1]->subTrees[0]->subTrees[0]->nodeName == "<R>");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[0]->tk.tokenID == "NUMTK");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[2]->nodeName == "<Z>");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[2]->subTrees[0]->tk.tokenLiteral == ">");
+    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[1]->tk.tokenLiteral == ",");
+    assert(rootNode->subTrees[1]->subTrees[2]->nodeName == "EndNode");
+}
 void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_A_node() {
     istringstream is("program begin scan aa , # end");
 
     Scanner scanner(is, cerr);
-    Parser parser(scanner);
+    token tk;
+    Parser parser(scanner, tk);
 
     Node* rootNode = parser.parse();
 
@@ -142,25 +177,16 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_A_node() {
 }
 //error testing
 void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_cause_error() {
-    istringstream is("program begin write aa , # end");
+    istringstream is("program begin write # end");
 
     Scanner scanner(is, cerr);
-    Parser parser(scanner);
+    token tk;
+    Parser parser(scanner, tk);
 
     Node* rootNode = parser.parse();
 
-    assert(rootNode->nodeName == "<S>");
-    assert(rootNode->subTrees[0]->nodeName == "ProgramNode");
-    assert(rootNode->subTrees[1]->nodeName == "<B>");
-    assert(rootNode->subTrees[1]->subTrees[0]->nodeName == "BeginNode");
-    assert(rootNode->subTrees[1]->subTrees[1]->nodeName == "<Q>");
-    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->nodeName == "<T>");
-    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[1]->tk.tokenLiteral == "#");
-    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->nodeName == "<W>");
-    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[0]->tk.tokenLiteral == "write");
-    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[0]->subTrees[1] == NULL);
-    assert(rootNode->subTrees[1]->subTrees[1]->subTrees[0]->subTrees[1]->tk.tokenLiteral == ",");
-    assert(rootNode->subTrees[1]->subTrees[2]->nodeName == "EndNode");
+    assert(rootNode->nodeName == "ERROR");
+    assert(rootNode->tk.tokenLiteral == "#");
 }
 
 
@@ -172,7 +198,9 @@ int main(int argc, char ** argv) {
     test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_B_node();
     test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node();
     test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_A_node();
-    //test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_cause_error();
+    //TODO: Fix I node. Test G,E,Z
+    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_I_node();
+    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_cause_error();
 
 
 
