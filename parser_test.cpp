@@ -15,8 +15,7 @@ void test_smallest_valid_BNF() {
     istringstream is("program begin end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -31,8 +30,7 @@ void test_smallest_valid_BNF_with_V_before_B() {
     istringstream is("program var aa . begin end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -47,8 +45,7 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node() {
     istringstream is("program begin begin end # end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -65,8 +62,7 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node() {
     istringstream is("program begin begin end # end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -84,8 +80,7 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_B_node() {
     istringstream is("program begin begin end # end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -106,8 +101,7 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node() {
     istringstream is("program begin write 12 , # end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -131,8 +125,7 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_I_node() {
     istringstream is("program begin if [ 12 > 5 ] begin end , # end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -159,8 +152,7 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_A_node() {
     istringstream is("program begin scan aa , # end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -182,8 +174,7 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_wit
     istringstream is("program begin write 12 + 5 , # end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -207,8 +198,7 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_E_node() {
     istringstream is("program begin let aa : 12 , # end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -228,8 +218,7 @@ void test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_cau
     istringstream is("program begin write # end");
 
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
 
     Node* rootNode = parser.parse();
 
@@ -241,8 +230,7 @@ void test_print_smallest_valid_BNF() {
     istringstream is("program begin end");
     ostringstream os;
     Scanner scanner(is, cerr);
-    token tk;
-    Parser parser(scanner, tk);
+    Parser parser(scanner);
     TestTree t;
     Node* rootNode = parser.parse();
     t.printTree(rootNode, os);
@@ -252,20 +240,41 @@ void test_print_smallest_valid_BNF() {
     assert(rootNode->subTrees[0]->nodeName == "ProgramNode");
 }
 
-int main(int argc, char ** argv) {
-    test_smallest_valid_BNF();
-    test_smallest_valid_BNF_with_V_before_B();
-    test_smallest_valid_BNF_with_B_node_into_Q_node();
-    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node();
-    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_B_node();
-    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node();
-    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_A_node();
-    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_I_node();
-    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_with_multiple_M_nodes();
-    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_E_node();
-    test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_cause_error();
-    test_print_smallest_valid_BNF();
+void test_this_fails() {
+  //    istringstream is("program \n var id1 . begin var id3. \n if [ id1 > 14 ] write id3 , , # end");
+    istringstream is("program \n var id1 . begin var id3. end");
+    ostringstream os;
 
+    Scanner scanner(is, cerr);
+    Parser parser(scanner);
+
+    Node* rootNode = parser.parse();
+
+    TestTree t;
+    t.printTree(rootNode, os);
+    cout << os.str();
+
+    assert(rootNode->nodeName == "<S>");
+    assert(rootNode->subTrees[0]->nodeName == "ProgramNode");
+}
+
+
+int main(int argc, char ** argv) {
+    // test_smallest_valid_BNF();
+    // test_smallest_valid_BNF_with_V_before_B();
+    // test_smallest_valid_BNF_with_B_node_into_Q_node();
+    // test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node();
+    // test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_B_node();
+    // test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node();
+    // test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_A_node();
+    // test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_I_node();
+    // test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_with_multiple_M_nodes();
+    // test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_E_node();
+    // test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_cause_error();
+    // test_print_smallest_valid_BNF();
+
+    // failing test!
+  test_this_fails();
 
     return 0;
 }

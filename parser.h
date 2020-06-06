@@ -1,13 +1,14 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
+#include "token.h"
+
 class Scanner;
 class Node;
-struct token;
 
 class Parser {
  public:
-  Parser(Scanner & scanner, token & token) : scanner(scanner), errTk(token) {}
+  Parser(Scanner & scanner) : scanner(scanner), errTk(), validParse(true) {}
 
   Node * parse();
 
@@ -28,8 +29,8 @@ class Parser {
 
  private:
   Scanner & scanner;
-  bool validParse = true;
-  token& errTk;
+  bool validParse;
+  token errTk;
 };
 
 #endif

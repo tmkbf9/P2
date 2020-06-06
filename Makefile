@@ -20,7 +20,7 @@ libscanner.a: scanner.o token.o
 test: parser_test
 	./parser_test
 
-parser_test: parser_test.o libscanner.a 
+parser_test: parser_test.o parser.o test_tree.o libscanner.a 
 	$(GCC) -o $@ $^
 
 clean:
