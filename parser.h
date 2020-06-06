@@ -15,17 +15,17 @@ class Parser {
   Node * createSNode(AvailableTokens& token);
   Node * createBNode(AvailableTokens& token);
   Node * createVNode(AvailableTokens& token);
-  // Node * createMNode(AvailableTokens& token);
-  // Node * createHNode(AvailableTokens& token);
-  // Node * createRNode(AvailableTokens& token);
-  // Node * createQNode(AvailableTokens& token);
-  // Node * createTNode(AvailableTokens& token);
-  // Node * createANode(AvailableTokens& token);
-  // Node * createWNode(AvailableTokens& token);
-  // Node * createINode(AvailableTokens& token);
-  // Node * createGNode(AvailableTokens& token);
-  // Node * createENode(AvailableTokens& token);
-  // Node * createZNode(AvailableTokens& token);
+  Node * createMNode(AvailableTokens& token);
+  Node * createHNode(AvailableTokens& token);
+  Node * createRNode(AvailableTokens& token);
+  Node * createQNode(AvailableTokens& token);
+  Node * createTNode(AvailableTokens& token);
+  Node * createANode(AvailableTokens& token);
+  Node * createWNode(AvailableTokens& token);
+  Node * createINode(AvailableTokens& token);
+  Node * createGNode(AvailableTokens& token);
+  Node * createENode(AvailableTokens& token);
+  Node * createZNode(AvailableTokens& token);
 
  private:
   bool validParse;
