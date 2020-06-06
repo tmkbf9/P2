@@ -24,7 +24,7 @@ parser_test: parser_test.o parser.o available_tokens.o test_tree.o libscanner.a
 	$(GCC) -o $@ $^
 
 clean:
-	$(RM) -f P2
+	$(RM) -f frontEnd
 	$(RM) -f parser_test
 	$(RM) -f libscanner.a
 	$(RM) -f *.o
