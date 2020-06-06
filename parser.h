@@ -1,34 +1,33 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
-#include "token.h"
+#include "available_tokens.h"
 
 class Scanner;
 class Node;
 
 class Parser {
  public:
-  Parser(Scanner & scanner) : scanner(scanner), errTk(), validParse(true) {}
+  Parser() : errTk(), validParse(true) {}
 
-  Node * parse();
+  Node * parse(Scanner & scanner);
 
-  Node * createSNode(token &token);
-  Node * createBNode(token &token);
-  Node * createVNode(token &token);
-  Node * createMNode(token& token);
-  Node * createHNode(token& token);
-  Node * createRNode(token& token);
-  Node * createQNode(token &token);
-  Node * createTNode(token& token);
-  Node * createANode(token& token);
-  Node * createWNode(token& token);
-  Node * createINode(token& token);
-  Node * createGNode(token& token);
-  Node * createENode(token& token);
-  Node * createZNode(token& token);
+  Node * createSNode(AvailableTokens& token);
+  Node * createBNode(AvailableTokens& token);
+  Node * createVNode(AvailableTokens& token);
+  // Node * createMNode(AvailableTokens& token);
+  // Node * createHNode(AvailableTokens& token);
+  // Node * createRNode(AvailableTokens& token);
+  // Node * createQNode(AvailableTokens& token);
+  // Node * createTNode(AvailableTokens& token);
+  // Node * createANode(AvailableTokens& token);
+  // Node * createWNode(AvailableTokens& token);
+  // Node * createINode(AvailableTokens& token);
+  // Node * createGNode(AvailableTokens& token);
+  // Node * createENode(AvailableTokens& token);
+  // Node * createZNode(AvailableTokens& token);
 
  private:
-  Scanner & scanner;
   bool validParse;
   token errTk;
 };

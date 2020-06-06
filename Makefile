@@ -11,7 +11,7 @@ AR := ar
 
 all: test
 
-P2: P2.o parser.o test_tree.o libscanner.a
+P2: P2.o parser.o available_tokens.o test_tree.o libscanner.a
 	$(GCC) -o $@ $^ libscanner.a
 
 libscanner.a: scanner.o token.o 
@@ -20,7 +20,7 @@ libscanner.a: scanner.o token.o
 test: parser_test
 	./parser_test
 
-parser_test: parser_test.o parser.o test_tree.o libscanner.a 
+parser_test: parser_test.o parser.o available_tokens.o test_tree.o libscanner.a 
 	$(GCC) -o $@ $^
 
 clean:
