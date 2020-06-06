@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, char** argv) {
     TestTree printer;
     token errorToken;
-    istream& is;
+
 
     if (argc == 1) { // read from stdin
         Scanner scanner(cin, cerr);

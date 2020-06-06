@@ -31,12 +31,13 @@ Node * Parser::createSNode(token & startingToken) {
     if(startingToken.tokenLiteral == "var") {
       Node * vNode = createVNode(startingToken);
       newNode->addSubtree(vNode, nodeCount++);
-      startingToken = scanner.scanner();
+  
     }
 
     if(startingToken.tokenLiteral == "begin") {
       Node * bNode = createBNode(startingToken);
       newNode->addSubtree(bNode, nodeCount++);
+      
       startingToken = scanner.scanner();
 
       if(startingToken.tokenID != "EOFTK") {
@@ -223,9 +224,15 @@ Node* Parser::createRNode(token& startingToken) {
 Node* Parser::createQNode(token& startingToken) {
     Node* newNode = new Node("<Q>");
     int nodeCount = 0;
-
+    if (startingToken.tokenLiteral != "begin") {
     Node* tNode = createTNode(startingToken);
     newNode->addSubtree(tNode, nodeCount++);
+    startingToken = scanner.scanner();
+    }
+    else if (startingToken.tokenLiteral == "begin"){
+        Node* tNode = createTNode(startingToken);
+        newNode->addSubtree(tNode, nodeCount++);
+    }
 
     startingToken = scanner.scanner();
 
@@ -258,10 +265,20 @@ Node* Parser::createTNode(token& startingToken) {
     if (startingToken.tokenLiteral == "scan") {
         Node* aNode = createANode(startingToken);
         newNode->addSubtree(aNode, nodeCount++);
+
+        if (startingToken.tokenLiteral == ",") {
+            Node* commaNode = new Node("CommaNode", startingToken);
+            newNode->addSubtree(commaNode, nodeCount++);
+        }
     }
     else if (startingToken.tokenLiteral == "write") {
         Node* wNode = createWNode(startingToken);
         newNode->addSubtree(wNode, nodeCount++);
+
+        if (startingToken.tokenLiteral == ",") {
+            Node* commaNode = new Node("CommaNode", startingToken);
+            newNode->addSubtree(commaNode, nodeCount++);
+        }
     } 
     else if (startingToken.tokenLiteral == "begin") {
         Node* bNode = createBNode(startingToken);
@@ -271,20 +288,33 @@ Node* Parser::createTNode(token& startingToken) {
     else if (startingToken.tokenLiteral == "if") {
         Node* iNode = createINode(startingToken);
         newNode->addSubtree(iNode, nodeCount++);
+
+        if (startingToken.tokenLiteral == ",") {
+            Node* commaNode = new Node("CommaNode", startingToken);
+            newNode->addSubtree(commaNode, nodeCount++);
+        }
     }
     else if (startingToken.tokenLiteral == "repeat") {
         Node* gNode = createGNode(startingToken);
         newNode->addSubtree(gNode, nodeCount++);
+
+        if (startingToken.tokenLiteral == ",") {
+            Node* commaNode = new Node("CommaNode", startingToken);
+            newNode->addSubtree(commaNode, nodeCount++);
+        }
     }
     else if (startingToken.tokenLiteral == "let") {
         Node* eNode = createENode(startingToken);
         newNode->addSubtree(eNode, nodeCount++);
+        
+        if (startingToken.tokenLiteral == ",") {
+            Node* commaNode = new Node("CommaNode", startingToken);
+            newNode->addSubtree(commaNode, nodeCount++);
+        }
+
     }
 
-    if (startingToken.tokenLiteral == "," && bNodeCreated == false) {
-        Node* commaNode = new Node("CommaNode", startingToken);
-        newNode->addSubtree(commaNode, nodeCount++);
-    }
+    
 
     if (((nodeCount != 2 && bNodeCreated == false) || (nodeCount != 1 && bNodeCreated == true)) && validParse) {
         validParse = false;

@@ -25,16 +25,21 @@ namespace {
 }
 
 void TestTree::printTree(Node * rootNode, std::ostream & os) {
-    traversePreOrder(rootNode, os, 0);
+    if (rootNode->nodeName == "ERROR") {
+        os << "Parse error encountered: " << rootNode->tk << endl;
+    }
+    else {
+        traversePreOrder(rootNode, os, 0);
+    }
 }
     
-void TestTree::traversePreOrder(Node* rootNode, ostream& logFile, int depth) {
+void TestTree::traversePreOrder(Node* rootNode, ostream& os, int depth) {
     if (rootNode == NULL) return;
 
-    logFile << blanks(depth) << depth + 1 << " " << correctOutput(rootNode) << endl;
+    os << blanks(depth) << depth + 1 << " " << correctOutput(rootNode) << endl;
 
     for (int subTreeIndex = 0; subTreeIndex < rootNode->subTrees.size(); subTreeIndex++) {
-        traversePreOrder(rootNode->subTrees[subTreeIndex], logFile, depth + 1);
+        traversePreOrder(rootNode->subTrees[subTreeIndex], os, depth + 1);
     }
 }
 
