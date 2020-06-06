@@ -292,7 +292,7 @@ int main(int argc, char ** argv) {
     test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_with_multiple_M_nodes();
     test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_E_node();
     test_smallest_valid_BNF_with_B_node_into_Q_node_into_T_node_into_W_node_cause_error();
-    test_print_valid_BNF();
+    //test_print_valid_BNF();
 
     // failing test!
     //test_this_fails();
