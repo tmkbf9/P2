@@ -1,5 +1,5 @@
 #include <string>
-#include <iostream>
+#include <sstream>
 #include "test_tree.h"
 #include "token.h"
 #include "node.h"
@@ -18,7 +18,12 @@ namespace {
 
     string correctOutput(Node* rootNode) {
         if (rootNode->nodeName.at(0) != '<') {
-            return rootNode->nodeName + " Token: " + rootNode->tk.tokenLiteral + " Linenumber: " + to_string(rootNode->tk.linenumber);
+	  ostringstream os;
+	  os << rootNode->nodeName
+	     << " Token: " << rootNode->tk.tokenLiteral
+	     << " Linenumber: " << rootNode->tk.linenumber;
+
+	  return os.str();
         }
         return rootNode->nodeName;
     }

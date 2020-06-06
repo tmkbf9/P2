@@ -10,37 +10,38 @@
 
 using namespace std;
 
-Node * Parser::parse() {
+Node * Parser::parse(Scanner & scanner) {
   validParse = true;
-  token startingToken = scanner.scanner();
+  token lookaheadToken = scanner.scanner();
 
-  return createSNode(startingToken);
+  AvailableTokens tokens(scanner, lookaheadToken);
+
+  return createSNode(tokens);
 }
 
-Node * Parser::createSNode(token & startingToken) {
+Node * Parser::createSNode(AvailableTokens & availableTokens) {
   Node * newNode = new Node("<S>");
-  string literal = startingToken.tokenLiteral;
   int nodeCount = 0;
   
-  if(literal == "program") {
-    Node * programNode = new Node("ProgramNode", startingToken);
+  token currentToken = availableTokens.nextToken();
+  if(currentToken.tokenLiteral == "program") {
+    Node * programNode = new Node("ProgramNode", currentToken);
     newNode->addSubtree(programNode, nodeCount++);
 
-    startingToken = scanner.scanner();
+    string nextTokenLiteral = availableTokens.lookaheadToken().tokenLiteral;
     
-    if(startingToken.tokenLiteral == "var") {
-      Node * vNode = createVNode(startingToken);
+    if(nextTokenLiteral == "var") {
+      Node * vNode = createVNode(availableTokens);
       newNode->addSubtree(vNode, nodeCount++);
-  
     }
+    
+    nextTokenLiteral = availableTokens.lookaheadToken().tokenLiteral;
 
-    if(startingToken.tokenLiteral == "begin") {
-      Node * bNode = createBNode(startingToken);
+    if(nextTokenLiteral == "begin") {
+      Node * bNode = createBNode(availableTokens);
       newNode->addSubtree(bNode, nodeCount++);
-      
-      startingToken = scanner.scanner();
 
-      if(startingToken.tokenID != "EOFTK") {
+      if(availableTokens.lookaheadToken().tokenID != "EOFTK") {
           validParse = false; 
       }
     } 
@@ -48,7 +49,7 @@ Node * Parser::createSNode(token & startingToken) {
   
   if ((nodeCount == 0 || nodeCount == 1) && validParse) {
     validParse = false;
-    errTk = startingToken;
+    errTk = currentToken;
   }
 
   if (!validParse) {
@@ -58,464 +59,439 @@ Node * Parser::createSNode(token & startingToken) {
   return newNode;
 }
 
-Node* Parser::createBNode(token& startingToken) {
+Node* Parser::createBNode(AvailableTokens & availableTokens) {
     Node * newNode = new Node("<B>");
     int nodeCount = 0;
 
-    if (startingToken.tokenLiteral == "begin") {
-        Node* beginNode = new Node("BeginNode", startingToken);
+    token currentToken = availableTokens.nextToken();
+    
+    if (currentToken.tokenLiteral == "begin") {
+        Node* beginNode = new Node("BeginNode", currentToken);
         newNode->addSubtree(beginNode, nodeCount++);
 
-        startingToken = scanner.scanner();
-        string literal = startingToken.tokenLiteral;
-
-        if (literal == "var") {
-            Node * vNode = createVNode(startingToken);
+	string nextTokenLiteral = availableTokens.lookaheadToken().tokenLiteral;
+        if (nextTokenLiteral == "var") {
+            Node * vNode = createVNode(availableTokens);
             newNode->addSubtree(vNode, nodeCount++);
-            startingToken = scanner.scanner();
         }
 
-        if (literal == "scan" || literal == "write" || literal == "begin" || literal == "if" || literal == "repeat" || literal == "let") {
-            Node* qNode = createQNode(startingToken);
-            newNode->addSubtree(qNode, nodeCount++);
+	nextTokenLiteral = availableTokens.lookaheadToken().tokenLiteral;
+        if (nextTokenLiteral == "scan" ||
+	    nextTokenLiteral == "write" ||
+	    nextTokenLiteral == "begin" ||
+	    nextTokenLiteral == "if" ||
+	    nextTokenLiteral == "repeat" ||
+	    nextTokenLiteral == "let") {
+	  // Node* qNode = createQNode(availableTokens);
+	  // newNode->addSubtree(qNode, nodeCount++);
         }
 
-        if (startingToken.tokenLiteral == "end")
+	currentToken = availableTokens.nextToken();
+        if (currentToken.tokenLiteral == "end")
         {
-            Node* endNode = new Node("EndNode", startingToken);
-            newNode->addSubtree(endNode, nodeCount++);
+	  Node* endNode = new Node("EndNode", currentToken);
+	  newNode->addSubtree(endNode, nodeCount++);
         }
     }
 
     if ((nodeCount == 0 || nodeCount == 1) && validParse) {
         validParse = false;
-        errTk = startingToken;
+        errTk = currentToken;
     }
 
     return newNode;
 }
 
-Node* Parser::createVNode(token& startingToken) {
+Node* Parser::createVNode(AvailableTokens & availableTokens) {
     Node* newNode = new Node("<V>");
     int nodeCount = 0;
 
-    if (startingToken.tokenLiteral == "var") {
-        Node* varNode = new Node("VarNode", startingToken);
+    token currentToken = availableTokens.nextToken();
+    
+    if (currentToken.tokenLiteral == "var") {
+        Node* varNode = new Node("VarNode", currentToken);
         newNode->addSubtree(varNode, nodeCount++);
 
-        startingToken = scanner.scanner();
+        currentToken = availableTokens.nextToken();
 
-        if (startingToken.tokenID == "IDTK") {
-            Node* identifierNode = new Node("IdentifierNode", startingToken);
+        if (currentToken.tokenID == "IDTK") {
+            Node* identifierNode = new Node("IdentifierNode", currentToken);
             newNode->addSubtree(identifierNode, nodeCount++);
 
-            startingToken = scanner.scanner();
-            string literal = startingToken.tokenLiteral;
-
-            if (startingToken.tokenLiteral == ".") {
-                Node* periodNode = new Node("PeriodNode", startingToken);
+            currentToken = availableTokens.nextToken();
+            if (currentToken.tokenLiteral == ".") {
+                Node* periodNode = new Node("PeriodNode", currentToken);
                 newNode->addSubtree(periodNode, nodeCount++);
 
-                startingToken = scanner.scanner();
-                string literal = startingToken.tokenLiteral;
-
-                if (literal == "var") {
-                    Node* vNode = createVNode(startingToken);
+		string nextTokenLiteral = availableTokens.lookaheadToken().tokenLiteral;
+                if (nextTokenLiteral == "var") {
+                    Node* vNode = createVNode(availableTokens);
                     newNode->addSubtree(vNode, nodeCount++);
-                    startingToken = scanner.scanner();
                 }
             }
         }
     }
 
     if (nodeCount != 4 && nodeCount != 3 && validParse) {
-       
         validParse = false;
-        errTk = startingToken;
+        errTk = currentToken;
     }
 
     return newNode;
 }
 
-Node* Parser::createMNode(token& startingToken) {
-    Node* newNode = new Node("<M>");
-    int nodeCount = 0;
-
-    Node* hNode = createHNode(startingToken);
-    newNode->addSubtree(hNode, nodeCount++);
-
-    startingToken = scanner.scanner();
-
-    if (startingToken.tokenLiteral == "+") {
-        Node* plusNode = new Node("PlusNode", startingToken);
-        newNode->addSubtree(plusNode, nodeCount++);
-    }
-    else if (startingToken.tokenLiteral == "-") {
-        Node* minusNode = new Node("MinusNode", startingToken);
-        newNode->addSubtree(minusNode, nodeCount++);
-    }
-    else if (startingToken.tokenLiteral == "/") {
-        Node* divideNode = new Node("DivideNode", startingToken);
-        newNode->addSubtree(divideNode, nodeCount++);
-    }
-    else if (startingToken.tokenLiteral == "*") {
-        Node* multiplyNode = new Node("MultiplyNode", startingToken);
-        newNode->addSubtree(multiplyNode, nodeCount++);
-    }
-
-    if (nodeCount == 2) {
-        startingToken = scanner.scanner();
-        Node* mNode = createMNode(startingToken);
-        newNode->addSubtree(mNode, nodeCount++);
-    }
-
-
-    if ((nodeCount != 1 && nodeCount != 3) && validParse) {
-        validParse = false;
-        errTk = startingToken;
-    }
-
-    return newNode;
-}
-Node* Parser::createHNode(token& startingToken) {
-    Node* newNode = new Node("<H>");
-    int nodeCount = 0;
-
-    if (startingToken.tokenLiteral == "&") {
-        Node* ampersandNode = new Node("AmpersandNode", startingToken);
-        newNode->addSubtree(ampersandNode, nodeCount++);
-        startingToken = scanner.scanner();
-    }
-
-    if (startingToken.tokenID == "IDTK" || startingToken.tokenID == "NUMTK") {
-        Node* rNode = createRNode(startingToken);
-        newNode->addSubtree(rNode, nodeCount++);
-    }
-
-    if ((nodeCount != 1 && nodeCount != 2) && validParse) {
-        validParse = false;
-        errTk = startingToken;
-    }
-
-    return newNode;
-}
-
-Node* Parser::createRNode(token& startingToken) {
-    Node* newNode = new Node("<R>");
-    int nodeCount = 0;
-
-    if (startingToken.tokenID == "IDTK") {
-        Node* identifierNode = new Node("IdentifierNode", startingToken);
-        newNode->addSubtree(identifierNode, nodeCount++);
-    }
-    else  if (startingToken.tokenID == "NUMTK") {
-        Node* numberNode = new Node("NumberNode", startingToken);
-        newNode->addSubtree(numberNode, nodeCount++);
-    }
-
-    if (nodeCount != 1 && validParse) {
-        validParse = false;
-        errTk = startingToken;
-    }
-
-    return newNode;
-}
-
-Node* Parser::createQNode(token& startingToken) {
-    Node* newNode = new Node("<Q>");
-    int nodeCount = 0;
-    if (startingToken.tokenLiteral != "begin") {
-    Node* tNode = createTNode(startingToken);
-    newNode->addSubtree(tNode, nodeCount++);
-    startingToken = scanner.scanner();
-    }
-    else if (startingToken.tokenLiteral == "begin"){
-        Node* tNode = createTNode(startingToken);
-        newNode->addSubtree(tNode, nodeCount++);
-    }
-
-    startingToken = scanner.scanner();
-
-    if (startingToken.tokenLiteral == "#") {
-        Node* poundNode = new Node("PoundNode", startingToken);
-        newNode->addSubtree(poundNode, nodeCount++);
-
-        startingToken = scanner.scanner();
-        string literal = startingToken.tokenLiteral;
-
-        if (literal == "scan" || literal == "write" || literal == "begin" || literal == "if" || literal == "repeat" || literal == "let") {
-            Node* qNode = createQNode(startingToken);
-            newNode->addSubtree(qNode, nodeCount++);
-        }
-    }
-
-    if ((nodeCount != 2 && nodeCount != 3) && validParse) {
-        validParse = false;
-        errTk = startingToken;
-    }
-
-    return newNode;
-}
-
-Node* Parser::createTNode(token& startingToken) {
-    Node* newNode = new Node("<T>");
-    int nodeCount = 0;
-    bool bNodeCreated = false;
-
-    if (startingToken.tokenLiteral == "scan") {
-        Node* aNode = createANode(startingToken);
-        newNode->addSubtree(aNode, nodeCount++);
-
-        if (startingToken.tokenLiteral == ",") {
-            Node* commaNode = new Node("CommaNode", startingToken);
-            newNode->addSubtree(commaNode, nodeCount++);
-        }
-    }
-    else if (startingToken.tokenLiteral == "write") {
-        Node* wNode = createWNode(startingToken);
-        newNode->addSubtree(wNode, nodeCount++);
-
-        if (startingToken.tokenLiteral == ",") {
-            Node* commaNode = new Node("CommaNode", startingToken);
-            newNode->addSubtree(commaNode, nodeCount++);
-        }
-    } 
-    else if (startingToken.tokenLiteral == "begin") {
-        Node* bNode = createBNode(startingToken);
-        newNode->addSubtree(bNode, nodeCount++);
-        bNodeCreated = true;
-    }
-    else if (startingToken.tokenLiteral == "if") {
-        Node* iNode = createINode(startingToken);
-        newNode->addSubtree(iNode, nodeCount++);
-
-        if (startingToken.tokenLiteral == ",") {
-            Node* commaNode = new Node("CommaNode", startingToken);
-            newNode->addSubtree(commaNode, nodeCount++);
-        }
-    }
-    else if (startingToken.tokenLiteral == "repeat") {
-        Node* gNode = createGNode(startingToken);
-        newNode->addSubtree(gNode, nodeCount++);
-
-        if (startingToken.tokenLiteral == ",") {
-            Node* commaNode = new Node("CommaNode", startingToken);
-            newNode->addSubtree(commaNode, nodeCount++);
-        }
-    }
-    else if (startingToken.tokenLiteral == "let") {
-        Node* eNode = createENode(startingToken);
-        newNode->addSubtree(eNode, nodeCount++);
-        
-        if (startingToken.tokenLiteral == ",") {
-            Node* commaNode = new Node("CommaNode", startingToken);
-            newNode->addSubtree(commaNode, nodeCount++);
-        }
-
-    }
-
-    
-
-    if (((nodeCount != 2 && bNodeCreated == false) || (nodeCount != 1 && bNodeCreated == true)) && validParse) {
-        validParse = false;
-        errTk = startingToken;
-    }
-
-    return newNode;
-}
-
-Node* Parser::createANode(token& startingToken) {
-    Node* newNode = new Node("<A>");
-    int nodeCount = 0;
-
-    if (startingToken.tokenLiteral == "scan") {
-        Node* scanNode = new Node("ScanNode", startingToken);
-        newNode->addSubtree(scanNode, nodeCount++);
-        startingToken = scanner.scanner();
-
-        if (startingToken.tokenID == "IDTK") {
-            Node* identifierNode = new Node("IdentifierNode", startingToken);
-            newNode->addSubtree(identifierNode, nodeCount++);
-            startingToken = scanner.scanner();
-        }
-        else if (startingToken.tokenID == "NUMTK") {
-            Node* numberNode = new Node("NumberNode", startingToken);
-            newNode->addSubtree(numberNode, nodeCount++);
-            startingToken = scanner.scanner();
-        }
-    }
-
-    if (nodeCount != 2 && validParse) {
-        validParse = false;
-        newNode = new Node("ERROR", startingToken);
-    }
-
-    return newNode;
-}
-
-Node* Parser::createWNode(token& startingToken) {
-    Node* newNode = new Node("<W>");
-    int nodeCount = 0;
-
-    if (startingToken.tokenLiteral == "write") {
-        Node* writeNode = new Node("WriteNode", startingToken);
-        newNode->addSubtree(writeNode, nodeCount++);
-        startingToken = scanner.scanner();
-
-    }
-
-    Node* mNode = createMNode(startingToken);
-    newNode->addSubtree(mNode, nodeCount++);
-
-    if (nodeCount != 2 && validParse) {
-        validParse = false;
-        newNode = new Node("ERROR", startingToken);
-    }
-    return newNode;
-}
-
-Node* Parser::createINode(token& startingToken) {
-    Node* newNode = new Node("<I>");
-    int nodeCount = 0;
-
-    if (startingToken.tokenLiteral == "if") {
-        Node* ifNode = new Node("IfNode", startingToken);
-        newNode->addSubtree(ifNode, nodeCount++);
-        startingToken = scanner.scanner();
-
-        if (startingToken.tokenLiteral == "[") {
-            Node* openBracketNode = new Node("OpenBracketNode", startingToken);
-            newNode->addSubtree(openBracketNode, nodeCount++);
-            startingToken = scanner.scanner();
-
-            Node* mNode = createMNode(startingToken);
-            newNode->addSubtree(mNode, nodeCount++);
-
-            Node* zNode = createZNode(startingToken);
-            newNode->addSubtree(zNode, nodeCount++);
-            startingToken = scanner.scanner();
-
-            mNode = createMNode(startingToken);
-            newNode->addSubtree(mNode, nodeCount++);
-
-            if (startingToken.tokenLiteral == "]") {
-                Node* closedBracketNode = new Node("closedBracketNode", startingToken);
-                newNode->addSubtree(closedBracketNode, nodeCount++);
-                startingToken = scanner.scanner();
-
-                Node* tNode = createTNode(startingToken);
-                newNode->addSubtree(tNode, nodeCount++);
-                startingToken = scanner.scanner();
-            }
-        }
-    }
-
-    if (nodeCount != 7 && validParse) {
-        validParse = false;
-        errTk = startingToken;
-    }
-    return newNode;
-}
-
-Node* Parser::createGNode(token& startingToken) {
-    Node* newNode = new Node("<I>");
-    int nodeCount = 0;
-
-    if (startingToken.tokenLiteral == "repeat") {
-        Node* repeatNode = new Node("repeatNode", startingToken);
-        newNode->addSubtree(repeatNode, nodeCount++);
-        startingToken = scanner.scanner();
-
-        if (startingToken.tokenLiteral == "[") {
-            Node* openBracketNode = new Node("OpenBracketNode", startingToken);
-            newNode->addSubtree(openBracketNode, nodeCount++);
-            startingToken = scanner.scanner();
-
-            Node* mNode = createMNode(startingToken);
-            newNode->addSubtree(mNode, nodeCount++);
-
-            Node* zNode = createZNode(startingToken);
-            newNode->addSubtree(zNode, nodeCount++);
-            startingToken = scanner.scanner();
-
-            mNode = createMNode(startingToken);
-            newNode->addSubtree(mNode, nodeCount++);
-
-            if (startingToken.tokenLiteral == "]") {
-                Node* closedBracketNode = new Node("closedBracketNode", startingToken);
-                newNode->addSubtree(closedBracketNode, nodeCount++);
-                startingToken = scanner.scanner();
-
-                Node* tNode = createTNode(startingToken);
-                newNode->addSubtree(tNode, nodeCount++);
-                startingToken = scanner.scanner();
-            }
-        }
-    }
-
-    if (nodeCount != 7 && validParse) {
-        validParse = false;
-        errTk = startingToken;
-    }
-    return newNode;
-}
-
-Node* Parser::createENode(token& startingToken) {
-    Node* newNode = new Node("<E>");
-    int nodeCount = 0;
-
-    if (startingToken.tokenLiteral == "let") {
-        Node* letNode = new Node("LetNode", startingToken);
-        newNode->addSubtree(letNode, nodeCount++);
-        startingToken = scanner.scanner();
-
-        if (startingToken.tokenID == "IDTK") {
-            Node* identifierNode = new Node("IdentifierNode", startingToken);
-            newNode->addSubtree(identifierNode, nodeCount++);
-            startingToken = scanner.scanner();
-
-            if (startingToken.tokenLiteral == ":") {
-                Node* colonNode = new Node("ColonNode", startingToken);
-                newNode->addSubtree(colonNode, nodeCount++);
-                startingToken = scanner.scanner();
-
-                Node* mNode = createMNode(startingToken);
-                newNode->addSubtree(mNode, nodeCount++);
-            }
-        }
-    }
-
-    return newNode;
-}
-Node* Parser::createZNode(token & startingToken) {
-    Node* newNode = new Node("<Z>");
-    int nodeCount = 0;
-
-    if (startingToken.tokenLiteral == "<") {
-        Node* lessNode = new Node("LessNode", startingToken);
-        newNode->addSubtree(lessNode, nodeCount++);
-    }
-    else if (startingToken.tokenLiteral == ">") {
-        Node* greaterNode = new Node("GreaterNode", startingToken);
-        newNode->addSubtree(greaterNode, nodeCount++);
-    }
-    else if (startingToken.tokenLiteral == ":") {
-        Node* colonNode = new Node("ColonNode", startingToken);
-        newNode->addSubtree(colonNode, nodeCount++);
-    }
-    else if (startingToken.tokenLiteral == "=") {
-        Node* equalsNode = new Node("EqualsNode", startingToken);
-        newNode->addSubtree(equalsNode, nodeCount++);
-    }
-    else if (startingToken.tokenLiteral == "==") {
-        Node* assNode = new Node("AssNode", startingToken);
-        newNode->addSubtree(assNode, nodeCount++);
-    }
-
-
-    if (nodeCount != 1 && validParse) {
-        validParse = false;
-        errTk = startingToken;
-    }
-    return newNode;
-}
+// Node * Parser::createMNode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<M>");
+//     int nodeCount = 0;
+
+//     Node* hNode = createHNode(availableTokens);
+//     newNode->addSubtree(hNode, nodeCount++);
+
+//     currentToken = scanner.scanner();
+
+//     if (currentToken.tokenLiteral == "+") {
+//         Node* plusNode = new Node("PlusNode", currentToken);
+//         newNode->addSubtree(plusNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == "-") {
+//         Node* minusNode = new Node("MinusNode", currentToken);
+//         newNode->addSubtree(minusNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == "/") {
+//         Node* divideNode = new Node("DivideNode", currentToken);
+//         newNode->addSubtree(divideNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == "*") {
+//         Node* multiplyNode = new Node("MultiplyNode", currentToken);
+//         newNode->addSubtree(multiplyNode, nodeCount++);
+//     }
+
+//     if (nodeCount == 2) {
+//         currentToken = scanner.scanner();
+//         Node* mNode = createMNode(availableTokens);
+//         newNode->addSubtree(mNode, nodeCount++);
+//     }
+
+
+//     if ((nodeCount != 1 && nodeCount != 3) && validParse) {
+//         validParse = false;
+//         errTk = currentToken;
+//     }
+
+//     return newNode;
+// }
+// Node* Parser::createHNode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<H>");
+//     int nodeCount = 0;
+
+//     if (currentToken.tokenLiteral == "&") {
+//         Node* ampersandNode = new Node("AmpersandNode", currentToken);
+//         newNode->addSubtree(ampersandNode, nodeCount++);
+//         currentToken = scanner.scanner();
+//     }
+
+//     if (currentToken.tokenID == "IDTK" || currentToken.tokenID == "NUMTK") {
+//         Node* rNode = createRNode(availableTokens);
+//         newNode->addSubtree(rNode, nodeCount++);
+//     }
+
+//     if ((nodeCount != 1 && nodeCount != 2) && validParse) {
+//         validParse = false;
+//         errTk = currentToken;
+//     }
+
+//     return newNode;
+// }
+
+// Node* Parser::createRNode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<R>");
+//     int nodeCount = 0;
+
+//     if (currentToken.tokenID == "IDTK") {
+//         Node* identifierNode = new Node("IdentifierNode", currentToken);
+//         newNode->addSubtree(identifierNode, nodeCount++);
+//     }
+//     else  if (currentToken.tokenID == "NUMTK") {
+//         Node* numberNode = new Node("NumberNode", currentToken);
+//         newNode->addSubtree(numberNode, nodeCount++);
+//     }
+
+//     if (nodeCount != 1 && validParse) {
+//         validParse = false;
+//         errTk = currentToken;
+//     }
+
+//     return newNode;
+// }
+
+// Node* Parser::createQNode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<Q>");
+//     int nodeCount = 0;
+
+//     Node* tNode = createTNode(availableTokens);
+//     newNode->addSubtree(tNode, nodeCount++);
+
+//     currentToken = scanner.scanner();
+
+//     if (currentToken.tokenLiteral == "#") {
+//         Node* poundNode = new Node("PoundNode", currentToken);
+//         newNode->addSubtree(poundNode, nodeCount++);
+
+//         currentToken = scanner.scanner();
+//         string literal = currentToken.tokenLiteral;
+
+//         if (literal == "scan" || literal == "write" || literal == "begin" || literal == "if" || literal == "repeat" || literal == "let") {
+//             Node* qNode = createQNode(availableTokens);
+//             newNode->addSubtree(qNode, nodeCount++);
+//         }
+//     }
+
+//     if ((nodeCount != 2 && nodeCount != 3) && validParse) {
+//         validParse = false;
+//         errTk = currentToken;
+//     }
+
+//     return newNode;
+// }
+
+// Node* Parser::createTNode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<T>");
+//     int nodeCount = 0;
+//     bool bNodeCreated = false;
+
+//     if (currentToken.tokenLiteral == "scan") {
+//         Node* aNode = createANode(availableTokens);
+//         newNode->addSubtree(aNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == "write") {
+//         Node* wNode = createWNode(availableTokens);
+//         newNode->addSubtree(wNode, nodeCount++);
+//     } 
+//     else if (currentToken.tokenLiteral == "begin") {
+//         Node* bNode = createBNode(availableTokens);
+//         newNode->addSubtree(bNode, nodeCount++);
+//         bNodeCreated = true;
+//     }
+//     else if (currentToken.tokenLiteral == "if") {
+//         Node* iNode = createINode(availableTokens);
+//         newNode->addSubtree(iNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == "repeat") {
+//         Node* gNode = createGNode(availableTokens);
+//         newNode->addSubtree(gNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == "let") {
+//         Node* eNode = createENode(availableTokens);
+//         newNode->addSubtree(eNode, nodeCount++);
+//     }
+
+//     if (currentToken.tokenLiteral == "," && bNodeCreated == false) {
+//         Node* commaNode = new Node("CommaNode", currentToken);
+//         newNode->addSubtree(commaNode, nodeCount++);
+//     }
+
+//     if (((nodeCount != 2 && bNodeCreated == false) || (nodeCount != 1 && bNodeCreated == true)) && validParse) {
+//         validParse = false;
+//         errTk = currentToken;
+//     }
+
+//     return newNode;
+// }
+
+// Node* Parser::createANode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<A>");
+//     int nodeCount = 0;
+
+//     if (currentToken.tokenLiteral == "scan") {
+//         Node* scanNode = new Node("ScanNode", currentToken);
+//         newNode->addSubtree(scanNode, nodeCount++);
+//         currentToken = scanner.scanner();
+
+//         if (currentToken.tokenID == "IDTK") {
+//             Node* identifierNode = new Node("IdentifierNode", currentToken);
+//             newNode->addSubtree(identifierNode, nodeCount++);
+//             currentToken = scanner.scanner();
+//         }
+//         else if (currentToken.tokenID == "NUMTK") {
+//             Node* numberNode = new Node("NumberNode", currentToken);
+//             newNode->addSubtree(numberNode, nodeCount++);
+//             currentToken = scanner.scanner();
+//         }
+//     }
+
+//     if (nodeCount != 2 && validParse) {
+//         validParse = false;
+//         newNode = new Node("ERROR", currentToken);
+//     }
+
+//     return newNode;
+// }
+
+// Node* Parser::createWNode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<W>");
+//     int nodeCount = 0;
+
+//     if (currentToken.tokenLiteral == "write") {
+//         Node* writeNode = new Node("WriteNode", currentToken);
+//         newNode->addSubtree(writeNode, nodeCount++);
+//         currentToken = scanner.scanner();
+
+//     }
+
+//     Node* mNode = createMNode(availableTokens);
+//     newNode->addSubtree(mNode, nodeCount++);
+
+//     if (nodeCount != 2 && validParse) {
+//         validParse = false;
+//         newNode = new Node("ERROR", currentToken);
+//     }
+//     return newNode;
+// }
+
+// Node* Parser::createINode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<I>");
+//     int nodeCount = 0;
+
+//     if (currentToken.tokenLiteral == "if") {
+//         Node* ifNode = new Node("IfNode", currentToken);
+//         newNode->addSubtree(ifNode, nodeCount++);
+//         currentToken = scanner.scanner();
+
+//         if (currentToken.tokenLiteral == "[") {
+//             Node* openBracketNode = new Node("OpenBracketNode", currentToken);
+//             newNode->addSubtree(openBracketNode, nodeCount++);
+//             currentToken = scanner.scanner();
+
+//             Node* mNode = createMNode(availableTokens);
+//             newNode->addSubtree(mNode, nodeCount++);
+
+//             Node* zNode = createZNode(availableTokens);
+//             newNode->addSubtree(zNode, nodeCount++);
+//             currentToken = scanner.scanner();
+
+//             mNode = createMNode(availableTokens);
+//             newNode->addSubtree(mNode, nodeCount++);
+
+//             if (currentToken.tokenLiteral == "]") {
+//                 Node* closedBracketNode = new Node("closedBracketNode", currentToken);
+//                 newNode->addSubtree(closedBracketNode, nodeCount++);
+//                 currentToken = scanner.scanner();
+
+//                 Node* tNode = createTNode(availableTokens);
+//                 newNode->addSubtree(tNode, nodeCount++);
+//                 currentToken = scanner.scanner();
+//             }
+//         }
+//     }
+
+//     if (nodeCount != 7 && validParse) {
+//         validParse = false;
+//         errTk = currentToken;
+//     }
+//     return newNode;
+// }
+
+// Node* Parser::createGNode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<I>");
+//     int nodeCount = 0;
+
+//     if (currentToken.tokenLiteral == "repeat") {
+//         Node* repeatNode = new Node("repeatNode", currentToken);
+//         newNode->addSubtree(repeatNode, nodeCount++);
+//         currentToken = scanner.scanner();
+
+//         if (currentToken.tokenLiteral == "[") {
+//             Node* openBracketNode = new Node("OpenBracketNode", currentToken);
+//             newNode->addSubtree(openBracketNode, nodeCount++);
+//             currentToken = scanner.scanner();
+
+//             Node* mNode = createMNode(availableTokens);
+//             newNode->addSubtree(mNode, nodeCount++);
+
+//             Node* zNode = createZNode(availableTokens);
+//             newNode->addSubtree(zNode, nodeCount++);
+//             currentToken = scanner.scanner();
+
+//             mNode = createMNode(availableTokens);
+//             newNode->addSubtree(mNode, nodeCount++);
+
+//             if (currentToken.tokenLiteral == "]") {
+//                 Node* closedBracketNode = new Node("closedBracketNode", currentToken);
+//                 newNode->addSubtree(closedBracketNode, nodeCount++);
+//                 currentToken = scanner.scanner();
+
+//                 Node* tNode = createTNode(availableTokens);
+//                 newNode->addSubtree(tNode, nodeCount++);
+//                 currentToken = scanner.scanner();
+//             }
+//         }
+//     }
+
+//     if (nodeCount != 7 && validParse) {
+//         validParse = false;
+//         errTk = currentToken;
+//     }
+//     return newNode;
+// }
+
+// Node* Parser::createENode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<E>");
+//     int nodeCount = 0;
+
+//     if (currentToken.tokenLiteral == "let") {
+//         Node* letNode = new Node("LetNode", currentToken);
+//         newNode->addSubtree(letNode, nodeCount++);
+//         currentToken = scanner.scanner();
+
+//         if (currentToken.tokenID == "IDTK") {
+//             Node* identifierNode = new Node("IdentifierNode", currentToken);
+//             newNode->addSubtree(identifierNode, nodeCount++);
+//             currentToken = scanner.scanner();
+
+//             if (currentToken.tokenLiteral == ":") {
+//                 Node* colonNode = new Node("ColonNode", currentToken);
+//                 newNode->addSubtree(colonNode, nodeCount++);
+//                 currentToken = scanner.scanner();
+
+//                 Node* mNode = createMNode(availableTokens);
+//                 newNode->addSubtree(mNode, nodeCount++);
+//             }
+//         }
+//     }
+
+//     return newNode;
+// }
+// Node* Parser::createZNode(AvailableTokens & availableTokens) {
+//     Node* newNode = new Node("<Z>");
+//     int nodeCount = 0;
+
+//     if (currentToken.tokenLiteral == "<") {
+//         Node* lessNode = new Node("LessNode", currentToken);
+//         newNode->addSubtree(lessNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == ">") {
+//         Node* greaterNode = new Node("GreaterNode", currentToken);
+//         newNode->addSubtree(greaterNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == ":") {
+//         Node* colonNode = new Node("ColonNode", currentToken);
+//         newNode->addSubtree(colonNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == "=") {
+//         Node* equalsNode = new Node("EqualsNode", currentToken);
+//         newNode->addSubtree(equalsNode, nodeCount++);
+//     }
+//     else if (currentToken.tokenLiteral == "==") {
+//         Node* assNode = new Node("AssNode", currentToken);
+//         newNode->addSubtree(assNode, nodeCount++);
+//     }
+
+
+//     if (nodeCount != 1 && validParse) {
+//         validParse = false;
+//         errTk = currentToken;
+//     }
+//     return newNode;
+// }
+
+
