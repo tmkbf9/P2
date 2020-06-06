@@ -15,15 +15,15 @@ int main(int argc, char** argv) {
 
     if (argc == 1) { // read from stdin
         Scanner scanner(cin, cerr);
-        Parser parser(scanner, errorToken);
-        Node* rootNode = parser.parse();
+        Parser parser;
+        Node* rootNode = parser.parse(scanner);
         printer.printTree(rootNode, cout);
     }
     else if (argc == 2) {// read from input file
         ifstream ifs(argv[1]);
         Scanner scanner(ifs, cerr);
-        Parser parser(scanner, errorToken);
-        Node* rootNode = parser.parse();
+        Parser parser;
+        Node* rootNode = parser.parse(scanner);
         printer.printTree(rootNode, cout);
   }
   else {
