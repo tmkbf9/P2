@@ -28,7 +28,7 @@ Node names:
 Development notes:
 Developed using test driven development. All of the tests used for development have been left inside the project for reference. These tests are all quiet (ie they produce no output.)
 
-P1 successfully compiled and ran on tc.rnet.missouri.edu on 6.06.2020.
+P2 successfully compiled and ran on tc.rnet.missouri.edu on 6.06.2020.
 
 Bugs/Issues:
 No known bugs or issues.
